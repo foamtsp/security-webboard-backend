@@ -1,10 +1,10 @@
-exports.setHeaders = (function (req, res, next) {
+exports.setHeaders = (function(req, res, next) {
 
     var frontendHost = process.env.FRONTEND || 'localhost';
 
     var frontendPort = process.env.FRONTENDPORT || '3000';
 
-    var frontendProxy = "http://"+ frontendHost +":"+ frontendPort;
+    var frontendProxy = "http://" + frontendHost + ":" + frontendPort;
 
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', frontendProxy);
@@ -13,7 +13,7 @@ exports.setHeaders = (function (req, res, next) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
     // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'Authorization');
+    res.setHeader('Access-Control-Allow-Headers', '*');
 
     // Set to true if you need the website to include cookies in the requests sent
     // to the API (e.g. in case you use sessions)
