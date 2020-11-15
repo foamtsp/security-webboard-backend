@@ -11,6 +11,7 @@ const decryptData = (encryptedData) => {
 };
 
 exports.getDecryptedData = (req, res, next) => {
+  console.log(getDec)
   if (process.env.NODE_ENV === 'development') {
     req.body = decryptData(req.body.data);
     delete req.body.data

@@ -59,10 +59,14 @@ app.use(optionsMiddleware.setHeaders);
 app.use('/api/users', userRouter);
 app.use('/api/blogs', blogRouter);
 
-app.all('*', (req, res, next) => {
+app.all('*', (req, res, next) => {  
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 app.use(globalErrorHandler);
+
+app.use((req, res, next) => {
+  res.status(404).send('<h1>Page not found<h1>');
+})
 
 module.exports = app;

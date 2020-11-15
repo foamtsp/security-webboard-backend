@@ -8,6 +8,7 @@ dotenv.config({
 });
 
 exports.getAllBlogs = async (req, res, next) => {
+  console.log('getAllBlog')
   try {
     const mongo = req.app.locals.db;
     const result = await mongo
@@ -29,6 +30,7 @@ exports.getAllBlogs = async (req, res, next) => {
 
 exports.createBlog = async (req, res, next) => {
   try {
+    console.log(req.body, ' createblog')
     const mongo = req.app.locals.db;
     const newBlog = req.body;
     const sequenceValue = await Counter.getSequenceValue(mongo, 'blogid');
@@ -113,7 +115,9 @@ exports.editBlog = async (req, res, next) => {
 exports.deleteBlog = async (req, res, next) => {
   try {
     const mongo = req.app.locals.db;
-    const _id = parseInt(req.params.id);
+    // const _id = parseInt(req.params.id);
+    var ObjectId = require('mongodb').ObjectId; // teemo add this line
+    const _id = ObjectId(req.params.id);
     const result = await mongo.db(process.env.DATABASE_NAME).collection('Blogs').deleteOne({
       _id,
     });
@@ -151,11 +155,12 @@ exports.getAllComments = async (req, res, next) => {
 
 exports.postComment = async (req, res, next) => {
   try {
+    var ObjectId = require('mongodb').ObjectId; // teemo add this line
     const mongo = req.app.locals.db;
-    const blogId = parseInt(req.params.id);
+    const blogId = ObjectId(req.params.id); // teemo add this line
+    // const blogId = parseInt(req.params.id);
     let payload = req.body;
-    const [firstName, lastName] = payload.name.split(' ');
-
+    const [firstName, lastName] = payload.name.split('');
     const currentBlog = await mongo
       .db(process.env.DATABASE_NAME)
       .collection('Blogs')
@@ -253,7 +258,8 @@ exports.getComment = async (req, res, next) => {
 exports.editComment = async (req, res, next) => {
   try {
     const mongo = req.app.locals.db;
-    const blogId = parseInt(req.params.id);
+    var ObjectId = require('mongodb').ObjectId; //teemo
+    const blogId = ObjectId(req.params.id);
     const payload = req.body;
     const cid = payload.cid;
     delete payload.cid;
@@ -265,9 +271,9 @@ exports.editComment = async (req, res, next) => {
         'comments.cid': cid,
       }, {
         $set: {
-          'comments.$.msg': payload.msg,
+          'comments.$.comment': payload.msg, //teemo
         },
-      });
+      });      
     if (result.modifiedCount > 0) {
       console.log('comment', cid, 'edited');
       // res.json(`${result.modifiedCount} edited`)
@@ -285,9 +291,11 @@ exports.editComment = async (req, res, next) => {
 exports.deleteComment = async (req, res, next) => {
   try {
     const mongo = req.app.locals.db;
-    const blogId = parseInt(req.params.id);
+    var ObjectId = require('mongodb').ObjectId; //teemo
+    const blogId = ObjectId(req.params.id); //teemo
     const payload = req.body;
     const cid = payload.cid;
+    console.log(blogId, req, cid, payload, ' blogcid')
     delete payload.cid;
     const result = await mongo
       .db(process.env.DATABASE_NAME)

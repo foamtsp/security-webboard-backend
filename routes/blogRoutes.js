@@ -9,7 +9,7 @@ router
     .route('/')
     .get(blogController.getAllBlogs)
     .post(
-        decryptController.getDecryptedData,
+        // decryptController.getDecryptedData, // foam fix this
         // authController.protect,
         blogController.createBlog
     );
@@ -30,13 +30,15 @@ router
 router
     .route('/:id/comments')
     .get(blogController.getAllComments)
-    .post(decryptController.getDecryptedData, blogController.postComment);
+    .post(blogController.postComment);
+    // .post(decryptController.getDecryptedData, blogController.postComment); //foam fix thissssssssss
 
 router
     .route('/:id/comment')
     .get(blogController.getComment)
     // front-end not call this line
-    .put(decryptController.getDecryptedData, blogController.editComment)
+    // .put(decryptController.getDecryptedData, blogController.editComment) //foam fix thissssssssss
+    .put(blogController.editComment)
     .delete(blogController.deleteComment);
 
 module.exports = router;
