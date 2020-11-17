@@ -1,75 +1,76 @@
-const jwt = require('jsonwebtoken');
+const fireadmin = require('firebase-admin');
+const dotenv = require('dotenv');
+dotenv.config({
+  path: './config.env'
+});
 
-const signToken = (id) => {
-  return jwt.sign(
-    {
-      id,
-    },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    }
-  );
+var firebaseConfig = {
+  apiKey: process.env.API_KEY,
+  authDomain: process.env.AUTH_DOMAIN,
+  databaseURL: process.env.DATABASE_URL,
+  projectId: process.env.PROJECT_ID,
+  storageBucket: process.env.STORAGE_BUCKET,
+  messagingSenderId: process.env.MESSAGING_SENDER_ID,
+  appId: process.env.APP_ID,
+  measurementId: process.env.MEASUREMENT_ID
 };
 
+// Initialize Firebase
+const admin = fireadmin.initializeApp(firebaseConfig);
+
 exports.createSendToken = (user, statusCode, res) => {
-  const token = signToken(user._id);
-  const cookieOptions = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 60 * 1000
-    ),
-    // httpOnly: true,
-  };
-
-  // if (process.env.NODE_ENV === 'production') {
-  //   cookieOptions.secure = true;
-  // }
-
-  res.cookie('jwt', token, cookieOptions);
-
-  // Remove the password from the output
-  user.password = undefined;
-
-  console.log(`User with the following id: ${user._id}`);
-  res.status(statusCode).json({
-    status: 'success',
-    data: {
-      user,
-    },
-  });
+  // Get the ID token passed and the CSRF token.
+  const idToken = req.body.idToken.toString();
+  const csrfToken = req.body.csrfToken.toString();
+  // Guard against CSRF attacks.
+  if (csrfToken !== req.cookies.csrfToken) {
+    res.status(401).send('UNAUTHORIZED REQUEST!');
+    return;
+  }
+  // Set session expiration to 5 days.
+  const expiresIn = 60 * 60 * 24 * 5 * 1000;
+  // Create the session cookie. This will also verify the ID token in the process.
+  // The session cookie will have the same claims as the ID token.
+  // To only allow session cookie setting on recent sign-in, auth_time in ID token
+  // can be checked to ensure user was recently signed in before creating a session cookie.
+  admin.auth().createSessionCookie(idToken, {expiresIn})
+    .then((sessionCookie) => {
+     // Set cookie policy for session cookie.
+     const options = {maxAge: expiresIn, httpOnly: true, secure: true};
+     res.cookie('session', sessionCookie, options);
+     res.end(JSON.stringify({
+       status: 'success',
+       data: {
+          user
+      },
+      }));
+    }, error => {
+     res.status(401).send('UNAUTHORIZED REQUEST!');
+    });
 };
 
 exports.protect = (req, res, next) => {
-  // 1) Getting token and check of it's there
-  let token;
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
-    token = req.headers.authorization.split(' ')[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
-  }
-
-  if (!token) {
-    console.log(req.headers);
-    return res.status(401).json({
-      status: 'fail',
-      message: 'You are not logged in! Please log in to get access',
+  const sessionCookie = req.cookies.session || '';
+  // Verify the session cookie. In this case an additional check is added to detect
+  // if the user's Firebase session was revoked, user deleted/disabled, etc.
+  admin.auth().verifySessionCookie(
+    sessionCookie, true /** checkRevoked */)
+    .then((decodedClaims) => {
+      next(decodedClaims);
+    })
+    .catch(error => {
+      // Session cookie is unavailable or invalid. Force user to login.
+      return res.status(401).json({
+        status: 'fail',
+        message: 'You are not logged in! Please log in to get access',
+      });
     });
-    // throw new Error('You are not logged in! Please log in to get access', 401);
-  }
 
-  // GRANT ACCESS TO PROTECTED ROUTE
-  next();
 };
 
 exports.logout = (req, res) => {
-  res.cookie('jwt', 'loggedout', {
-    expires: new Date(Date.now() + 10 * 1000),
-    // httpOnly: true
-  });
+  res.clearCookie('session');
   res.status(200).json({
     status: 'success',
   });

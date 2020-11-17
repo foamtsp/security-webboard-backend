@@ -6,7 +6,6 @@ const decryptController = require('../controllers/decryptController');
 const router = express.Router();
 
 // Not protect from any users
-router.post('/signup', decryptController.getDecryptedData, userController.signup);
 router.post('/login', decryptController.getDecryptedData, userController.login);
 router.get('/logout', authController.logout);
 

@@ -1,4 +1,3 @@
-const Counter = require('../models/counterModel');
 const {
   createSendToken
 } = require('./authController');
@@ -9,36 +8,10 @@ dotenv.config({
   path: './config.env'
 });
 
-exports.signup = (async (req, res, next) => {
-  const mongo = req.app.locals.db;
-  const newUser = req.body;
-
-  const sequenceValue = await Counter.getSequenceValue(mongo, 'productid');
-
-  newUser._id = sequenceValue;
-  newUser.currentJob = [];
-  newUser.pendingJob = [];
-  newUser.notification = [];
-  newUser.TFvector = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  newUser.wallet = 0;
-  newUser.jobOwn = [];
-  newUser.blogOwn = [];
-  newUser.reviewOwn = [];
-
-  const result = await mongo
-    .db(process.env.DATABASE_NAME)
-    .collection('Users')
-    .insertOne(newUser);
-
-  // res.json is in createSendToken
-  createSendToken(result.ops[0], 201, res);
-});
-
 exports.login = (async (req, res, next) => {
   const mongo = req.app.locals.db;
   const {
     email,
-    pass
   } = req.body;
 
   // 1) Check if email and password exist
