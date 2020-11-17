@@ -22,7 +22,8 @@ router
         // authController.protect,
         blogController.editBlog
     )
-    .delete(authController.protect, blogController.deleteBlog);
+    .delete(blogController.deleteBlog);
+    // .delete(authController.protect, blogController.deleteBlog);
 
 // Comments
 // router.use(authController.protect);

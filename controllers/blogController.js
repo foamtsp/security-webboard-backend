@@ -31,7 +31,7 @@ exports.createBlog = async (req, res, next) => {
   try {
     const mongo = req.app.locals.db;
     const newBlog = req.body;
-    const sequenceValue = await Counter.getSequenceValue(mongo, 'blogid');
+    const sequenceValue = await Counter.getSequenceValue(mongo, 'blogId');
     newBlog._id = sequenceValue;
     newBlog.timestamp = Date.now();
     newBlog.comments = [];

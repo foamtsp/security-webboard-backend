@@ -1,13 +1,18 @@
+const dotenv = require('dotenv');
+dotenv.config({
+  path: './config.env'
+});
+
 exports.getSequenceValue = async (mongo, sequenceName) => {
     try {
         const sequenceValue = await mongo
-            .db('CUPartTime')
+            .db(process.env.DATABASE_NAME)
             .collection('counters')
             .findOne({
                 _id: sequenceName,
             });
         await mongo
-            .db('CUPartTime')
+            .db(process.env.DATABASE_NAME)
             .collection('counters')
             .updateOne({
                 _id: sequenceName,
