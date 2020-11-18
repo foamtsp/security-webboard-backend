@@ -1,7 +1,5 @@
-// const notification = require('../models/notificationModel');
 const Counter = require('../models/counterModel');
 const AppError = require('../utils/appError');
-// const noti = require('../models/notifyOOP');
 const dotenv = require('dotenv');
 dotenv.config({
   path: './config.env'
@@ -73,14 +71,12 @@ exports.getBlog = async (req, res, next) => {
     const result = await mongo.db(process.env.DATABASE_NAME).collection('Blogs').findOne({
       _id,
     });
-    console.log(result);
 
     if (result) {
       console.log('Blog', _id, 'found, returning blog');
       res.status(200).json(result);
     } else {
       console.log('fail to find blog');
-      // res.json(`fail to find blog ${_id}`)
       return next(new AppError('Can not get this blog with this id.', 404));
     }
   } catch (err) {
@@ -191,32 +187,11 @@ exports.postComment = async (req, res, next) => {
       });
 
     if (result) {
-      /*payload = {
-        timestamp: Date.now(),
-        string: 'You have new comment',
-        status: 0,
-        BlogId: blogId,
-      };
-      await notification.notifyPayload(mongo, [currentBlog.Employer], payload);*/
-      // var notifyComment = new noti.CommentNotification(blogId)
-      // notifyComment.notify(mongo, [currentBlog.Employer])
-
-      // Call to get currentUser and not notify to myself
-      const currentUser = await mongo.db(process.env.DATABASE_NAME).collection('Users').findOne({
-        firstName,
-        lastName
-      });
-
-      // if (currentBlog.Employer !== currentUser.email) {
-      //   await notification.notifyPayload(mongo, [currentBlog.Employer], payload);
-      // }
 
       console.log('comment', cid, 'added');
-      // res.json(`${result.modifiedCount} commented`)
       res.status(201).json('comment is created');
     } else {
       console.log('fail to comment');
-      // res.json(`fail to comment ${blogId}`)
       return next(new AppError('Fail to comment on this blog.', 404));
     }
   } catch (err) {
@@ -243,7 +218,6 @@ exports.getComment = async (req, res, next) => {
       res.status(200).json(result_comment);
     } else {
       console.log('fail to find');
-      // res.json(`fail to find blog ${blogId}`)
       return next(new AppError('Can not get this comment by id.', 404));
     }
   } catch (err) {
@@ -266,16 +240,14 @@ exports.editComment = async (req, res, next) => {
         'comments.cid': cid,
       }, {
         $set: {
-          'comments.$.msg': payload.msg,
+          'comments.$.comment': payload.msg,
         },
       });
     if (result.modifiedCount > 0) {
       console.log('comment', cid, 'edited');
-      // res.json(`${result.modifiedCount} edited`)
       res.status(200).json(result);
     } else {
       console.log('fail to edit comment');
-      // res.json(`fail to edit comment ${blogId}`)
       return next(new AppError('Can not edit this comment.', 404));
     }
   } catch (err) {
@@ -304,11 +276,9 @@ exports.deleteComment = async (req, res, next) => {
       });
     if (result.modifiedCount > 0) {
       console.log('comment', cid, 'deleted');
-      // res.json(`${result.modifiedCount} deleted`)
       res.status(204).json();
     } else {
       console.log('fail to edit deleted');
-      // res.json(`fail to edit deleted ${blogId}`)
       return next(new AppError('Fail to delete this comment', 404));
     }
   } catch (err) {
