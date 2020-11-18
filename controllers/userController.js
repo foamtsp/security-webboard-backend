@@ -14,8 +14,10 @@ exports.login = (async (req, res, next) => {
     email,
   } = req.body;
 
+  console.log(req.body)
+
   // 1) Check if email and password exist
-  if (!email || !pass) {
+  if (!email) {
     return next(new AppError('Please provide email and password!', 400));
   }
 
@@ -25,7 +27,7 @@ exports.login = (async (req, res, next) => {
   });
 
   //   await bcrypt.compare(candidatePassword, userPassword);
-  if (!currentUser || !(currentUser.password === pass)) {
+  if (!currentUser) {
     res.status(404).json({
       status: 'fail',
       message: 'Incorrect email or password',
@@ -33,7 +35,7 @@ exports.login = (async (req, res, next) => {
     return next(new AppError('Incorrect email or password', 404));
   }
 
-  createSendToken(currentUser, 200, res);
+  createSendToken(currentUser, 200, req, res);
 });
 
 exports.getUser = (async (req, res, next) => {

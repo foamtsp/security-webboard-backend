@@ -9,7 +9,7 @@ router
     .route('/')
     .get(blogController.getAllBlogs)
     .post(
-        decryptController.getDecryptedData,
+        // decryptController.getDecryptedData,
         // authController.protect,
         blogController.createBlog
     );
@@ -18,7 +18,7 @@ router
     .route('/:id')
     .get(blogController.getBlog)
     .put(
-        decryptController.getDecryptedData,
+        // decryptController.getDecryptedData,
         // authController.protect,
         blogController.editBlog
     )
@@ -31,13 +31,17 @@ router
 router
     .route('/:id/comments')
     .get(blogController.getAllComments)
-    .post(decryptController.getDecryptedData, blogController.postComment);
+    .post(
+        // decryptController.getDecryptedData,
+         blogController.postComment);
 
 router
     .route('/:id/comment')
     .get(blogController.getComment)
     // front-end not call this line
-    .put(decryptController.getDecryptedData, blogController.editComment)
+    .put(
+        // decryptController.getDecryptedData,
+        blogController.editComment)
     .delete(blogController.deleteComment);
 
 module.exports = router;

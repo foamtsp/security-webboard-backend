@@ -93,6 +93,7 @@ exports.editBlog = async (req, res, next) => {
     const mongo = req.app.locals.db;
     const _id = parseInt(req.params.id);
     const newContent = req.body;
+    console.log(newContent)
     const result = await mongo.db(process.env.DATABASE_NAME).collection('Blogs').updateOne({
       _id,
     }, {

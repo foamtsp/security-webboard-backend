@@ -18,7 +18,7 @@ var firebaseConfig = {
 // Initialize Firebase
 const admin = fireadmin.initializeApp(firebaseConfig);
 
-exports.createSendToken = (user, statusCode, res) => {
+exports.createSendToken = (user, statusCode, req, res) => {
   // Get the ID token passed and the CSRF token.
   const idToken = req.body.idToken.toString();
   const csrfToken = req.body.csrfToken.toString();
