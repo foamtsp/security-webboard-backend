@@ -1,14 +1,15 @@
 # Use Node v8 as the base image.
 FROM node:alpine
 
+RUN apk update
+RUN apk add git
+WORKDIR /usr/src/app
+RUN git clone https://github.com/foamtsp/security-webboard-backend.git
+
 # Create app directory
-WORKDIR /usr/src/app/server
-# Install app dependencies
-COPY package*.json ./
+WORKDIR /usr/src/app/security-webboard-backend
 
 RUN npm install
-# Copy app source code
-COPY . .
 
 #Expose port and start application
 EXPOSE 9000
