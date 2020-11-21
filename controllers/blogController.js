@@ -49,7 +49,6 @@ exports.createBlog = async (req, res, next) => {
           blogOwn: sequenceValue,
         },
       });
-    console.log(result);
 
     if (result) {
       console.log('blog created with id', sequenceValue);
@@ -89,7 +88,6 @@ exports.editBlog = async (req, res, next) => {
     const mongo = req.app.locals.db;
     const _id = parseInt(req.params.id);
     const newContent = req.body;
-    console.log(newContent)
     const result = await mongo.db(process.env.DATABASE_NAME).collection('Blogs').updateOne({
       _id,
     }, {

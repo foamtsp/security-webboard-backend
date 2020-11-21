@@ -7,7 +7,10 @@ const router = express.Router();
 
 router
     .route('/')
-    .get(blogController.getAllBlogs)
+    .get(
+        authController.protect,
+        blogController.getAllBlogs
+    )
     .post(
         decryptController.getDecryptedData,
         authController.protect,
@@ -16,14 +19,17 @@ router
 
 router
     .route('/:id')
-    .get(blogController.getBlog)
+    .get(
+        authController.protect,
+        blogController.getBlog)
     .put(
         decryptController.getDecryptedData,
         authController.protect,
         blogController.editBlog
     )
-    .delete(authController.protect,
-         blogController.deleteBlog
+    .delete(
+        authController.protect,
+        blogController.deleteBlog
     );
 
 // Comments
@@ -31,19 +37,28 @@ router
 
 router
     .route('/:id/comments')
-    .get(blogController.getAllComments)
+    .get(authController.protect, blogController.getAllComments)
     .post(
+        authController.protect,
         decryptController.getDecryptedData,
         blogController.postComment
     );
 
 router
     .route('/:id/comment')
-    .get(blogController.getComment)
+    .get(
+        authController.protect,
+        blogController.getComment
+    )
     // front-end not call this line
     .put(
+        authController.protect,
         decryptController.getDecryptedData,
         blogController.editComment)
-    .delete(blogController.deleteComment);
+    .delete(
+        authController.protect,
+        decryptController.getDecryptedData,
+        blogController.deleteComment
+    );
 
 module.exports = router;

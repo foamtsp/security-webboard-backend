@@ -12,11 +12,11 @@ router.get('/logout', authController.logout);
 // Protect all routes after this middleware
 // router.use(authController.protect);
 
-router.get('/useremail/:email', userController.getUserByEmail);
+router.get('/useremail/:email', authController.protect, userController.getUserByEmail);
 
 router
     .route('/:id')
-    .get(userController.getUser)
+    .get(authController.protect, userController.getUser)
     .put(decryptController.getDecryptedData, userController.updateUser);
 
 module.exports = router;

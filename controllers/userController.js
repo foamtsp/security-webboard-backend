@@ -10,11 +10,7 @@ dotenv.config({
 
 exports.login = (async (req, res, next) => {
   const mongo = req.app.locals.db;
-  const {
-    email,
-  } = req.body;
-
-  console.log(req.body)
+  const email = req.body.email;
 
   // 1) Check if email and password exist
   if (!email) {

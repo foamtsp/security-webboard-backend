@@ -1,29 +1,23 @@
-const fireadmin = require('firebase-admin');
+const fireAdmin = require('firebase-admin');
+const serviceAccount = require("../security-auth-1ffeb-firebase-adminsdk.json");
 const dotenv = require('dotenv');
+const CryptoJS = require('crypto-js');
 dotenv.config({
   path: './config.env'
 });
 
-var firebaseConfig = {
-  apiKey: process.env.API_KEY,
-  authDomain: process.env.AUTH_DOMAIN,
-  databaseURL: process.env.DATABASE_URL,
-  projectId: process.env.PROJECT_ID,
-  storageBucket: process.env.STORAGE_BUCKET,
-  messagingSenderId: process.env.MESSAGING_SENDER_ID,
-  appId: process.env.APP_ID,
-  measurementId: process.env.MEASUREMENT_ID
-};
-
 // Initialize Firebase
-const admin = fireadmin.initializeApp(firebaseConfig);
+const admin = fireAdmin.initializeApp({
+  credential: fireAdmin.credential.cert(serviceAccount),
+  databaseURL: process.env.DATABASE_URL
+});
 
 exports.createSendToken = (user, statusCode, req, res) => {
   // Get the ID token passed and the CSRF token.
   const idToken = req.body.idToken.toString();
   const csrfToken = req.body.csrfToken.toString();
   // Guard against CSRF attacks.
-  if (csrfToken !== req.cookies.csrfToken) {
+  if (csrfToken !== process.env.CSRF_TOKEN) {
     res.status(401).send('UNAUTHORIZED REQUEST!');
     return;
   }
@@ -36,28 +30,38 @@ exports.createSendToken = (user, statusCode, req, res) => {
   admin.auth().createSessionCookie(idToken, {expiresIn})
     .then((sessionCookie) => {
      // Set cookie policy for session cookie.
-     const options = {maxAge: expiresIn, httpOnly: true, secure: true};
-     res.cookie('session', sessionCookie, options);
-     res.end(JSON.stringify({
+     let enToken = CryptoJS.AES.encrypt(JSON.stringify(`Bearer ${sessionCookie}`), process.env.PASSWORD_SECRET).toString();
+     res.send(JSON.stringify({
+       token: enToken,
        status: 'success',
        data: {
           user
-      },
+       }
       }));
     }, error => {
-     res.status(401).send('UNAUTHORIZED REQUEST!');
+      console.log(error)
+      res.status(401).send('UNAUTHORIZED REQUEST!');
     });
 };
 
 exports.protect = (req, res, next) => {
 
-  const sessionCookie = req.cookies.session || '';
+  let sessionCookie;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    sessionCookie = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    sessionCookie = req.cookies.jwt;
+  }
   // Verify the session cookie. In this case an additional check is added to detect
   // if the user's Firebase session was revoked, user deleted/disabled, etc.
   admin.auth().verifySessionCookie(
     sessionCookie, true /** checkRevoked */)
     .then((decodedClaims) => {
-      next(decodedClaims);
+      next();
     })
     .catch(error => {
       // Session cookie is unavailable or invalid. Force user to login.
